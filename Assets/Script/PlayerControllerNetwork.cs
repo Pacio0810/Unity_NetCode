@@ -9,6 +9,7 @@ public class PlayerControllerNetwork : NetworkBehaviour
     [SerializeField] private float JumpForce = 10.0f;
     [SerializeField] private LayerMask GroundMask;
     [SerializeField] private GameObject IsGroundedPosition;
+    [SerializeField] private GameObject PrefabObj;
 
     private CharacterController characterController;
     private bool isGrounded = false;
@@ -22,7 +23,7 @@ public class PlayerControllerNetwork : NetworkBehaviour
 
     void Update()
     {
-        if(!IsOwner)
+        if (!IsOwner)
         {
             return;
         }
@@ -64,7 +65,49 @@ public class PlayerControllerNetwork : NetworkBehaviour
             Vector3 jump = Vector3.up * JumpForce;
             _rb.AddForce(jump, ForceMode.Impulse);
         }
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            SpawnObject();
+        }
 
         return MoveDirection;
+    }
+
+    private void SpawnObject()
+    {
+        //Vector3 offset = new Vector3(transform.position.x, 1.0f, transform.position.z - 1.0f);
+        //GameObject spawnedObj = Instantiate(SpawnedGameObject, offset, Quaternion.identity);
+
+        
+        if (IsServer)
+        {
+            // sono il server/host, quindi ho l'autorita' per spawnare direttamente i GameObject
+            OnSpawn();
+        }
+        else
+        {
+            // non sono il server/host, quindi per spawnare un GameObject devo fare una richiesta al server
+            OnSpawnObjectServerRpc();
+        }
+
+        //NetworkObject ObjSpawned = NetworkManager.SpawnManager.InstantiateAndSpawn(PrefabObj, forceOverride: true);
+        //ObjSpawned.transform.position = offset;
+    }
+
+    // ServerRpc che viene chiamata dal client
+    [ServerRpc]
+    private void OnSpawnObjectServerRpc(ServerRpcParams rpcParams = default)
+    {
+        // chiamo la funzione di spawn
+        OnSpawn();
+    }
+
+    private void OnSpawn()
+    {
+        Vector3 offset = new Vector3(transform.position.x, 1.0f, transform.position.z - 1.0f);
+
+        // Istanzio il GameObject e poi lo spawno
+        GameObject spawnedObj = Instantiate(PrefabObj, offset, Quaternion.identity);
+        spawnedObj.GetComponent<NetworkObject>().Spawn(true);
     }
 }
