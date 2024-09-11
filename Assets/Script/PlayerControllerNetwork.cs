@@ -21,6 +21,8 @@ public class PlayerControllerNetwork : NetworkBehaviour
     private bool isGrounded = false;
     private Rigidbody _rb;
 
+    [SerializeField] private GameObject Camera;
+
     private void Start()
     {
         characterController = GetComponent<CharacterController>();
@@ -35,6 +37,7 @@ public class PlayerControllerNetwork : NetworkBehaviour
         }
         CheckGround();
         transform.position += CheckInput() * MovementSpeed * Time.deltaTime;
+        Debug.Log(IsLocalPlayer);
     }
 
     void CheckGround()
