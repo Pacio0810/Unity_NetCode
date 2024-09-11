@@ -2,14 +2,20 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class PlayerControllerNetwork : NetworkBehaviour
 {
+    [Header("Movement Settings")]
     [SerializeField] private float MovementSpeed = 3.0f;
     [SerializeField] private float JumpForce = 10.0f;
-    [SerializeField] private LayerMask GroundMask;
     [SerializeField] private GameObject IsGroundedPosition;
-    [SerializeField] private GameObject PrefabObj;
+    [SerializeField] private LayerMask GroundMask;
+
+
+    [SerializeField] private AssetReferenceGameObject PrefabObj;
+    private GameObject instancePrefabRef;
 
     private CharacterController characterController;
     private bool isGrounded = false;
@@ -75,10 +81,6 @@ public class PlayerControllerNetwork : NetworkBehaviour
 
     private void SpawnObject()
     {
-        //Vector3 offset = new Vector3(transform.position.x, 1.0f, transform.position.z - 1.0f);
-        //GameObject spawnedObj = Instantiate(SpawnedGameObject, offset, Quaternion.identity);
-
-        
         if (IsServer)
         {
             // sono il server/host, quindi ho l'autorita' per spawnare direttamente i GameObject
@@ -89,9 +91,6 @@ public class PlayerControllerNetwork : NetworkBehaviour
             // non sono il server/host, quindi per spawnare un GameObject devo fare una richiesta al server
             OnSpawnObjectServerRpc();
         }
-
-        //NetworkObject ObjSpawned = NetworkManager.SpawnManager.InstantiateAndSpawn(PrefabObj, forceOverride: true);
-        //ObjSpawned.transform.position = offset;
     }
 
     // ServerRpc che viene chiamata dal client
@@ -104,10 +103,24 @@ public class PlayerControllerNetwork : NetworkBehaviour
 
     private void OnSpawn()
     {
-        Vector3 offset = new Vector3(transform.position.x, 1.0f, transform.position.z - 1.0f);
+        // Istanzio il GameObject tramite gli addressable
+        PrefabObj.InstantiateAsync().Completed += OnAddressableInstantiated;
+    }
 
-        // Istanzio il GameObject e poi lo spawno
-        GameObject spawnedObj = Instantiate(PrefabObj, offset, Quaternion.identity);
-        spawnedObj.GetComponent<NetworkObject>().Spawn(true);
+    private void OnAddressableInstantiated(AsyncOperationHandle<GameObject> handle)
+    {
+        if (handle.Status == AsyncOperationStatus.Succeeded)
+        {
+            // l'operazione ha successo quindi lo spawno
+            instancePrefabRef = handle.Result;
+
+            Vector3 offset = new Vector3(transform.position.x, 1.0f, transform.position.z - 1.0f);
+            instancePrefabRef.transform.position = offset;
+            instancePrefabRef.GetComponent<NetworkObject>().Spawn(true);
+        }
+        else
+        {
+            Debug.Log("loading Asset Failed");
+        }
     }
 }

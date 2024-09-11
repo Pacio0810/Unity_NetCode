@@ -16,7 +16,17 @@ MonoBehaviour:
   m_Data:
     m_SerializedData: []
   m_GUID: bd4967c3e9838074b9c90f92fdc1c3eb
-  m_SerializeEntries: []
+  m_SerializeEntries:
+  - m_GUID: 77dec68cdad479643a74350f1e16bc60
+    m_Address: Assets/Prefab/Player.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a0b0ae95093f7e44f931dc34e8454673
+    m_Address: Assets/Prefab/SpawnedObject.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 19c628628850f1146905a4c20fae6bb6, type: 2}
   m_SchemaSet:
