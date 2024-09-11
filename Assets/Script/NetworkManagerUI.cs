@@ -6,26 +6,41 @@ using Unity.Netcode;
 
 public class NetworkManagerUI : MonoBehaviour
 {
-    [SerializeField] private Button ServerButton;
     [SerializeField] private Button HostButton;
     [SerializeField] private Button ClientButton;
+    [SerializeField] private Button QuitButton;
 
     private void Awake()
     {
-        // Utilizzo le lambda
-        ServerButton.onClick.AddListener(() =>
-        {
-            NetworkManager.Singleton.StartServer();
-        });
-
+        // utilizzo le landa per creare una funzione veloce
         HostButton.onClick.AddListener(() =>
         {
-            NetworkManager.Singleton.StartHost();
+            bool isHosting = NetworkManager.Singleton.StartHost();
+            if (isHosting)
+            {
+                DisableUI();
+            }
+
         });
 
         ClientButton.onClick.AddListener(() =>
         {
-            NetworkManager.Singleton.StartClient();
+            while(!NetworkManager.Singleton.StartClient())
+            {
+                continue;
+            }
+            DisableUI();
         });
+
+        QuitButton.onClick.AddListener(() =>
+        {
+            Application.Quit();
+        });
+    }
+
+    private void DisableUI()
+    {
+        HostButton.gameObject.SetActive(false);
+        ClientButton.gameObject.SetActive(false);
     }
 }
