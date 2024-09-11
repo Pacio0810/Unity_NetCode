@@ -49,7 +49,6 @@ public class NetworkManagerUI : MonoBehaviour
     {
         if (NetworkManager.Singleton.IsServer)
         {
-
             OnLoadPlayer();
         }
         else
