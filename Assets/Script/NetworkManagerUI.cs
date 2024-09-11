@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using Unity.Netcode;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using System;
 
 public class NetworkManagerUI : MonoBehaviour
 {
@@ -17,21 +18,16 @@ public class NetworkManagerUI : MonoBehaviour
 
     private void Awake()
     {
-        DontDestroyOnLoad(this);
+        // istanzio il player dagli addressable
+        
+
         // utilizzo le landa per creare una funzione veloce
         HostButton.onClick.AddListener(() =>
         {
             bool isHosting = NetworkManager.Singleton.StartHost();
             if (isHosting)
             {
-                if (NetworkManager.Singleton != null && PlayerAssets != null)
-                {
-                    // istanzio il player dagli addressable
-                    PlayerAssets.InstantiateAsync().Completed += OnAddressablePlayerInstantiated;
-
-                    // una volta caricato lo assegno al NetworkManager
-                    NetworkManager.Singleton.NetworkConfig.PlayerPrefab = PlayerRef;
-                }
+                LoadPlayer();
                 DisableUI();
             }
 
@@ -52,12 +48,45 @@ public class NetworkManagerUI : MonoBehaviour
         });
     }
 
+    private void LoadPlayer()
+    {
+        if (NetworkManager.Singleton.IsServer)
+        {
+
+            OnLoadPlayer();
+        }
+        else
+        {
+            OnLoadPlayerServerRpc();
+        }
+    }
+
+    [ServerRpc]
+    private void OnLoadPlayerServerRpc(ServerRpcParams rpcParams = default)
+    {
+        SpawnPlayer();
+    }
+
+    private void SpawnPlayer()
+    {
+        PlayerRef.GetComponent<NetworkObject>().Spawn(true);
+    }
+
+    private void OnLoadPlayer()
+    {
+        if (NetworkManager.Singleton != null && PlayerAssets != null)
+        {
+            PlayerAssets.InstantiateAsync().Completed += OnAddressablePlayerInstantiated;
+        }
+    }
+
     private void OnAddressablePlayerInstantiated(AsyncOperationHandle<GameObject> handle)
     {
         if (handle.Status == AsyncOperationStatus.Succeeded)
         {
             // il caricamento e' avvenuto con successo quindi mi salvo il player nella sua reference e lo spawno
             PlayerRef = handle.Result;
+            NetworkManager.Singleton.NetworkConfig.PlayerPrefab = PlayerRef;
             PlayerRef.GetComponent<NetworkObject>().Spawn(true);
         }
         else
