@@ -18,9 +18,6 @@ public class NetworkManagerUI : MonoBehaviour
 
     private void Awake()
     {
-        // istanzio il player dagli addressable
-        
-
         // utilizzo le landa per creare una funzione veloce
         HostButton.onClick.AddListener(() =>
         {
@@ -35,7 +32,7 @@ public class NetworkManagerUI : MonoBehaviour
 
         ClientButton.onClick.AddListener(() =>
         {
-            while(!NetworkManager.Singleton.StartClient())
+            while (!NetworkManager.Singleton.StartClient())
             {
                 continue;
             }
@@ -63,11 +60,6 @@ public class NetworkManagerUI : MonoBehaviour
 
     [ServerRpc]
     private void OnLoadPlayerServerRpc(ServerRpcParams rpcParams = default)
-    {
-        SpawnPlayer();
-    }
-
-    private void SpawnPlayer()
     {
         PlayerRef.GetComponent<NetworkObject>().Spawn(true);
     }
