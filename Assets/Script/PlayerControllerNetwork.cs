@@ -9,7 +9,6 @@ public class PlayerControllerNetwork : NetworkBehaviour
 {
     [Header("Movement Settings")]
     [SerializeField] private float MovementSpeed = 3.0f;
-    [SerializeField] private float JumpForce = 10.0f;
     [SerializeField] private GameObject IsGroundedPosition;
     [SerializeField] private LayerMask GroundMask;
 
@@ -17,15 +16,14 @@ public class PlayerControllerNetwork : NetworkBehaviour
     [SerializeField] private AssetReferenceGameObject PrefabObj;
     private GameObject instancePrefabRef;
 
-    private bool isGrounded = false;
-    private Rigidbody _rb;
+    private CharacterController characterController;
 
     [Header("Camera Variable")]
     [SerializeField] private GameObject Camera;
 
     private void Start()
     {
-        _rb = GetComponent<Rigidbody>();
+        characterController = GetComponent<CharacterController>();
     }
 
     void Update()
@@ -39,9 +37,7 @@ public class PlayerControllerNetwork : NetworkBehaviour
         {
             DisableLocalPlayerCamera();
         }
-
-        CheckGround();
-        transform.position += CheckInput() * MovementSpeed * Time.deltaTime;
+        CheckInput();
         
     }
 
@@ -61,46 +57,18 @@ public class PlayerControllerNetwork : NetworkBehaviour
         }
     }
 
-    void CheckGround()
-    {
-        isGrounded = false;
-        if (Physics.CheckSphere(IsGroundedPosition.transform.position, 0.25f, GroundMask))
-        {
-            isGrounded = true;
-        }
-    }
+    private void CheckInput()
+    { 
+        float x = Input.GetAxis("Horizontal");
+        float z = Input.GetAxis("Vertical");
 
-    Vector3 CheckInput()
-    {
-        Vector3 MoveDirection = new Vector3(0, 0, 0);
+        Vector3 Move = transform.right * x + transform.forward * z;
+        characterController.Move(Move * MovementSpeed * Time.deltaTime);
 
-        if (Input.GetKey(KeyCode.W))
-        {
-            MoveDirection.z = +1.0f;
-        }
-        if (Input.GetKey(KeyCode.S))
-        {
-            MoveDirection.z = -1.0f;
-        }
-        if (Input.GetKey(KeyCode.A))
-        {
-            MoveDirection.x = -1.0f;
-        }
-        if (Input.GetKey(KeyCode.D))
-        {
-            MoveDirection.x = +1.0f;
-        }
-        if (Input.GetKey(KeyCode.Space) && isGrounded)
-        {
-            Vector3 jump = Vector3.up * JumpForce;
-            _rb.AddForce(jump, ForceMode.Impulse);
-        }
         if (Input.GetKeyDown(KeyCode.F))
         {
             SpawnObject();
         }
-
-        return MoveDirection;
     }
 
     private void SpawnObject()
