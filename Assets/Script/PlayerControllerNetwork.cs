@@ -13,56 +13,19 @@ public class PlayerControllerNetwork : NetworkBehaviour
     [SerializeField] private GameObject IsGroundedPosition;
     [SerializeField] private LayerMask GroundMask;
 
-
+    [Header("Addressable Object To Spawn")]
     [SerializeField] private AssetReferenceGameObject PrefabObj;
     private GameObject instancePrefabRef;
 
-    private CharacterController characterController;
     private bool isGrounded = false;
     private Rigidbody _rb;
 
+    [Header("Camera Variable")]
     [SerializeField] private GameObject Camera;
 
     private void Start()
     {
-        characterController = GetComponent<CharacterController>();
         _rb = GetComponent<Rigidbody>();
-
-        
-
-    }
-
-    void DisableLocalPlayerCamera()
-    {
-        GameObject[] allPlayers = GameObject.FindGameObjectsWithTag("Player");
-
-        foreach (GameObject player in allPlayers)
-        {
-
-            if (player.GetComponent<NetworkBehaviour>().OwnerClientId == 1)
-            {
-                // Disattiva la camera dell'altro player
-                player.GetComponentInChildren<Camera>().enabled = false;
-            }
-        }
-    }
-
-    void DisableOtherLocalPlayerCamera()
-    {
-        Debug.Log("ServerDisabling");
-        // Qui dovresti trovare e disabilitare la camera dell'altro player
-        // Supponiamo che ogni player abbia un tag o un riferimento
-        GameObject[] allPlayers = GameObject.FindGameObjectsWithTag("Player");
-
-        foreach (GameObject player in allPlayers)
-        {
-            if (player.GetComponent<NetworkBehaviour>().OwnerClientId == 0)
-            {
-                // Disattiva la camera dell'altro player
-                player.GetComponentInChildren<Camera>().enabled = false;
-                Debug.Log("Cam server player disattivata");
-            }
-        }
     }
 
     void Update()
@@ -74,18 +37,28 @@ public class PlayerControllerNetwork : NetworkBehaviour
 
         if (IsServer)
         {
-            Camera.gameObject.SetActive(true);
             DisableLocalPlayerCamera();
-        }
-        else
-        {
-            Camera.gameObject.SetActive(true);
-            //DisableOtherLocalPlayerCamera();
         }
 
         CheckGround();
         transform.position += CheckInput() * MovementSpeed * Time.deltaTime;
         
+    }
+
+    void DisableLocalPlayerCamera()
+    {
+        // prendo tutti i player
+        GameObject[] allPlayers = GameObject.FindGameObjectsWithTag("Player");
+
+        foreach (GameObject player in allPlayers)
+        {
+            //tutti i player che sono client
+            if (player.GetComponent<NetworkBehaviour>().OwnerClientId != 0)
+            {
+                // Disattiva la camera
+                player.GetComponentInChildren<Camera>().enabled = false;
+            }
+        }
     }
 
     void CheckGround()

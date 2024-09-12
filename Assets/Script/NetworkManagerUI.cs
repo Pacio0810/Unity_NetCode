@@ -9,11 +9,14 @@ using System;
 
 public class NetworkManagerUI : MonoBehaviour
 {
+    [Header("User Interface Button Variable")]
     [SerializeField] private Button HostButton;
     [SerializeField] private Button ClientButton;
     [SerializeField] private Button QuitButton;
 
-    public AssetReferenceGameObject PlayerAssets;
+    [Header("Addressable Player variable")]
+    [SerializeField]private AssetReferenceGameObject PlayerAssets;
+
     private GameObject PlayerRef;
 
     private void Awake()
