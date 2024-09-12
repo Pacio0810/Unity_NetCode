@@ -15,6 +15,7 @@ public class SpawnManager : MonoBehaviour
     private void Awake()
     {
         DontDestroyOnLoad(this);
+
     }
     public void LoadPlayer()
     {
