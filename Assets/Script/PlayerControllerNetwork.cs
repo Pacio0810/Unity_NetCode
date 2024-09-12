@@ -14,6 +14,7 @@ public class PlayerControllerNetwork : NetworkBehaviour
 
     [Header("Addressable Object To Spawn")]
     [SerializeField] private AssetReferenceGameObject PrefabObj;
+    public float SpawnDistance = 2.0f;
     private GameObject instancePrefabRef;
 
     private CharacterController characterController;
@@ -69,6 +70,10 @@ public class PlayerControllerNetwork : NetworkBehaviour
         {
             SpawnObject();
         }
+        if (Input.GetKey(KeyCode.Escape))
+        {
+            Application.Quit();
+        }
     }
 
     private void SpawnObject()
@@ -106,8 +111,7 @@ public class PlayerControllerNetwork : NetworkBehaviour
             // l'operazione ha successo quindi lo spawno
             instancePrefabRef = handle.Result;
 
-            Vector3 offset = new Vector3(transform.position.x, 1.0f, transform.position.z - 1.0f);
-            instancePrefabRef.transform.position = offset;
+            instancePrefabRef.transform.position = transform.position + transform.forward * SpawnDistance + Vector3.up;
             instancePrefabRef.GetComponent<NetworkObject>().Spawn(true);
         }
         else

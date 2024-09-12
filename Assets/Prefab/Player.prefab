@@ -325,6 +325,7 @@ MonoBehaviour:
     m_SubObjectName: 
     m_SubObjectType: 
     m_EditorAssetChanged: 0
+  SpawnDistance: 2
   Camera: {fileID: 1002307161681283317}
 --- !u!143 &-9105810542305056338
 CharacterController:

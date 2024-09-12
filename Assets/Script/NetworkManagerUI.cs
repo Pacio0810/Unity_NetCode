@@ -93,5 +93,6 @@ public class NetworkManagerUI : MonoBehaviour
     {
         HostButton.gameObject.SetActive(false);
         ClientButton.gameObject.SetActive(false);
+        QuitButton.gameObject.SetActive(false);
     }
 }
