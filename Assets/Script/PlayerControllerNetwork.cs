@@ -27,6 +27,42 @@ public class PlayerControllerNetwork : NetworkBehaviour
     {
         characterController = GetComponent<CharacterController>();
         _rb = GetComponent<Rigidbody>();
+
+        
+
+    }
+
+    void DisableLocalPlayerCamera()
+    {
+        GameObject[] allPlayers = GameObject.FindGameObjectsWithTag("Player");
+
+        foreach (GameObject player in allPlayers)
+        {
+
+            if (player.GetComponent<NetworkBehaviour>().OwnerClientId == 1)
+            {
+                // Disattiva la camera dell'altro player
+                player.GetComponentInChildren<Camera>().enabled = false;
+            }
+        }
+    }
+
+    void DisableOtherLocalPlayerCamera()
+    {
+        Debug.Log("ServerDisabling");
+        // Qui dovresti trovare e disabilitare la camera dell'altro player
+        // Supponiamo che ogni player abbia un tag o un riferimento
+        GameObject[] allPlayers = GameObject.FindGameObjectsWithTag("Player");
+
+        foreach (GameObject player in allPlayers)
+        {
+            if (player.GetComponent<NetworkBehaviour>().OwnerClientId == 0)
+            {
+                // Disattiva la camera dell'altro player
+                player.GetComponentInChildren<Camera>().enabled = false;
+                Debug.Log("Cam server player disattivata");
+            }
+        }
     }
 
     void Update()
@@ -35,9 +71,21 @@ public class PlayerControllerNetwork : NetworkBehaviour
         {
             return;
         }
+
+        if (IsServer)
+        {
+            Camera.gameObject.SetActive(true);
+            DisableLocalPlayerCamera();
+        }
+        else
+        {
+            Camera.gameObject.SetActive(true);
+            //DisableOtherLocalPlayerCamera();
+        }
+
         CheckGround();
         transform.position += CheckInput() * MovementSpeed * Time.deltaTime;
-        Debug.Log(IsLocalPlayer);
+        
     }
 
     void CheckGround()
