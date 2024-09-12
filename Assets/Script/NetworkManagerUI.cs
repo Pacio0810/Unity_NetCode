@@ -14,10 +14,7 @@ public class NetworkManagerUI : MonoBehaviour
     [SerializeField] private Button ClientButton;
     [SerializeField] private Button QuitButton;
 
-    [Header("Addressable Player variable")]
-    [SerializeField]private AssetReferenceGameObject PlayerAssets;
-
-    private GameObject PlayerRef;
+    [SerializeField] private SpawnManager SpawnManager;
 
     private void Awake()
     {
@@ -27,7 +24,7 @@ public class NetworkManagerUI : MonoBehaviour
             bool isHosting = NetworkManager.Singleton.StartHost();
             if (isHosting)
             {
-                LoadPlayer();
+                SpawnManager.LoadPlayer();
                 DisableUI();
             }
 
@@ -48,46 +45,7 @@ public class NetworkManagerUI : MonoBehaviour
         });
     }
 
-    private void LoadPlayer()
-    {
-        if (NetworkManager.Singleton.IsServer)
-        {
-            OnLoadPlayer();
-        }
-        else
-        {
-            OnLoadPlayerServerRpc();
-        }
-    }
-
-    [ServerRpc]
-    private void OnLoadPlayerServerRpc(ServerRpcParams rpcParams = default)
-    {
-        PlayerRef.GetComponent<NetworkObject>().Spawn(true);
-    }
-
-    private void OnLoadPlayer()
-    {
-        if (NetworkManager.Singleton != null && PlayerAssets != null)
-        {
-            PlayerAssets.InstantiateAsync().Completed += OnAddressablePlayerInstantiated;
-        }
-    }
-
-    private void OnAddressablePlayerInstantiated(AsyncOperationHandle<GameObject> handle)
-    {
-        if (handle.Status == AsyncOperationStatus.Succeeded)
-        {
-            // il caricamento e' avvenuto con successo quindi mi salvo il player nella sua reference e lo spawno
-            PlayerRef = handle.Result;
-            NetworkManager.Singleton.NetworkConfig.PlayerPrefab = PlayerRef;
-            PlayerRef.GetComponent<NetworkObject>().Spawn(true);
-        }
-        else
-        {
-            Debug.Log("Loading playerPrefab Failed");
-        }
-    }
+   
 
     private void DisableUI()
     {
